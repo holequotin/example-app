@@ -2,26 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
 use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
+    protected $postRepository;
     /**
-     * Display a listing of the resource.
+     * Display a listing of post.
+     * Return all post when userId param is null
      */
+    public function __construct(PostRepositoryInterface $postRepository) {
+        $this->postRepository = $postRepository;
+    }
     public function index()
     {
         //
-        $posts = Post::all();
+        $userId = request('userId');
+        if(!$userId) {
+            $posts = $this->postRepository->getAll();
+        }else{
+            $posts = $this->postRepository->getPostsByUser($userId);
+        }
         return PostResource::collection($posts);
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -38,10 +47,11 @@ class PostController extends Controller
         //
         $content = $request['content'];
         $userId = $request['userId'];
-        $user = User::find($userId);
-        $post = new Post();
-        $post->content = $content;
-        $user->posts()->save($post);
+        $post = $this->postRepository->create(['content' => $content,'user_id' => $userId]);
+        // $user = User::find($userId);
+        // $post = new Post();
+        // $post->content = $content;
+        // $user->posts()->save($post);
         return new PostResource($post);
     }
 
@@ -51,7 +61,7 @@ class PostController extends Controller
     public function show(string $id)
     {
         //
-        $post = Post::find($id);
+        $post = $this->postRepository->find($id);
         if(!$post){
             return response()->json([
                 "message" => "Post not found"
@@ -86,12 +96,11 @@ class PostController extends Controller
      */
     public function destroy(Request $request,string $id)
     {   
-        $post = Post::find($id);
+        $post = $this->postRepository->delete($id);
         if(!$post) {
             return response()->json(["message" => "Post not found"],404);
         }
         try {
-            $post->delete();
             return response()->json(["message" => "Delete post sucessfully"]);
         } catch (Exception $e) {
             return response()->json(["message" => "Post not found"],404);

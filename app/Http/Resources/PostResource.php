@@ -18,7 +18,7 @@ class PostResource extends JsonResource
             'id' => $this->id,
             'content' => $this->content,
             'imgPath' => $this->imgPath,
-            'user' => new UserResource($this->whenLoaded('user'))
+            'user_id' => $this->user_id
         ];
     }
 }
