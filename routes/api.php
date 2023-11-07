@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,13 +27,19 @@ Route::group([
     'prefix' => 'auth'
 
 ], function ($router) {
-
     Route::post('login', [AuthController::class,'login']);
     Route::post('logout', [AuthController::class,'logout']);
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
     Route::post('register',[AuthController::class,'register']);
+});
 
+Route::controller(PostController::class)->group(function () {
+    Route::get("/posts/{id}",[PostController::class,'show']);
+    Route::get("/posts",[PostController::class,'index']);
+    Route::post("/posts",[PostController::class,'store']);
+    Route::put("/posts/{post}",[PostController::class,'update']);
+    Route::delete("/posts/{post}",[PostController::class,'destroy']);
 });
 
 Route::get('hello/{userId}', [UserController::class,'hello'])->name("testApi");
