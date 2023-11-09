@@ -42,4 +42,9 @@ Route::controller(PostController::class)->group(function () {
     Route::delete("/posts/{post}",[PostController::class,'destroy']);
 });
 
+Route::prefix('fake')->group(function () {
+    Route::post("/users",[UserController::class,'create']);
+    Route::post("/posts/{id}",[PostController::class,'create']);
+});
+
 Route::get('hello/{userId}', [UserController::class,'hello'])->name("testApi");

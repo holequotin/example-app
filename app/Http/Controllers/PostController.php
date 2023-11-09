@@ -8,6 +8,7 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
+use Database\Factories\PostFactory;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -18,26 +19,39 @@ class PostController extends Controller
      * Display a listing of post.
      * Return all post when userId param is null
      */
-    public function __construct(PostRepositoryInterface $postRepository) {
+    public function __construct(PostRepositoryInterface $postRepository)
+    {
         $this->postRepository = $postRepository;
     }
     public function index()
     {
         //
         $userId = request('userId');
-        if(!$userId) {
+        if (!$userId) {
             $posts = $this->postRepository->getAll();
-        }else{
+        } else {
             $posts = $this->postRepository->getPostsByUser($userId);
         }
         return PostResource::collection($posts);
     }
     /**
-     * Show the form for creating a new resource.
+     * Create fake data by using factory.
      */
-    public function create()
+    public function create(Request $request,string $id)
     {
         //
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json([
+                "error" => "User not found"
+            ], 404);
+        } else {
+            $posts = Post::factory()
+                        ->count(10)
+                        ->for($user)
+                        ->create();
+            return PostResource::collection($posts);
+        }
     }
 
     /**
@@ -62,11 +76,11 @@ class PostController extends Controller
     {
         //
         $post = $this->postRepository->find($id);
-        if(!$post){
+        if (!$post) {
             return response()->json([
                 "message" => "Post not found"
-            ],404);
-        }else{
+            ], 404);
+        } else {
             return new PostResource($post);
         }
     }
@@ -94,16 +108,16 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request,string $id)
-    {   
+    public function destroy(Request $request, string $id)
+    {
         $post = $this->postRepository->delete($id);
-        if(!$post) {
-            return response()->json(["message" => "Post not found"],404);
+        if (!$post) {
+            return response()->json(["message" => "Post not found"], 404);
         }
         try {
             return response()->json(["message" => "Delete post sucessfully"]);
         } catch (Exception $e) {
-            return response()->json(["message" => "Post not found"],404);
+            return response()->json(["message" => "Post not found"], 404);
         }
     }
 }
