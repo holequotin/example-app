@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StorePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
@@ -42,12 +43,11 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
         //
-        $content = $request['content'];
-        $userId = $request['userId'];
-        $post = $this->postRepository->create(['content' => $content,'user_id' => $userId]);
+        $validated = $request->validated();
+        $post = $this->postRepository->create($validated);
         // $user = User::find($userId);
         // $post = new Post();
         // $post->content = $content;
