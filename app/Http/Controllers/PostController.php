@@ -8,7 +8,6 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
-use Database\Factories\PostFactory;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -61,11 +60,12 @@ class PostController extends Controller
     {
         //
         $validated = $request->validated();
+        if(array_key_exists('image',$validated)) {
+            $image = $validated['image'];
+            $relativeUrl = $image->store('posts');
+            $validated['imgPath'] = url($relativeUrl);
+        }
         $post = $this->postRepository->create($validated);
-        // $user = User::find($userId);
-        // $post = new Post();
-        // $post->content = $content;
-        // $user->posts()->save($post);
         return new PostResource($post);
     }
 

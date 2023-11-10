@@ -23,8 +23,9 @@ class StorePostRequest extends FormRequest
     {
         return [
             //
-            'content' => 'required|min:5',
+            'content' => "required_without:image|min:5",
             'user_id' => 'required|exists:users,id',
+            'image' => "required_without:content"
         ];
     }
 }
