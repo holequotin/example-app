@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -96,12 +98,22 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post)
     {
         //
-        $content = $request['content'];
-        $post->content = $content;
-        $post->save();
+        $validated = $request->validated();
+        if(array_key_exists('image',$validated)) {
+            $image = $validated['image'];
+            $currRelativeUrl = str_replace(url('/'),'',$post->imgPath);
+            Storage::delete($currRelativeUrl);
+            if($image) {
+                $relativeUrl = $image->store('posts');
+                $validated['imgPath'] = url($relativeUrl);
+            }else{
+                $validated['imgPath'] = null;
+            }
+        }
+        $post = $this->postRepository->update($post->id,$validated);
         return new PostResource($post);
     }
 
@@ -110,8 +122,8 @@ class PostController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
-        $post = $this->postRepository->delete($id);
-        if (!$post) {
+        $deleted = $this->postRepository->delete($id);
+        if (!$deleted) {
             return response()->json(["message" => "Post not found"], 404);
         }
         try {
