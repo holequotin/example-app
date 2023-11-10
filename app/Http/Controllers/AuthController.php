@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterPostRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -26,9 +27,7 @@ class AuthController extends Controller
         $user->email = $validated['email'];
         $user->password = Hash::make($validated['password']);
         $user->save();
-        return response()->json([
-            "user"=>$user
-        ]);
+        return new UserResource($user);
     }
     /**
      * Get a JWT via given credentials.
