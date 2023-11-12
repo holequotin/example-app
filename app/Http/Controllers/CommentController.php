@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Resources\CommentResource;
+use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class CommentController extends Controller
 {
@@ -21,7 +23,8 @@ class CommentController extends Controller
     public function index()
     {
         //
-
+        $comments = $this->commentRepository->getAll();
+        return CommentResource::collection($comments);
     }
 
     /**
@@ -54,6 +57,13 @@ class CommentController extends Controller
     public function show(Comment $comment)
     {
         //
+        if($comment) {
+            return new CommentResource($comment);
+        }else{
+            return response()->json([
+                "error" => "Comment not found"
+            ]);
+        }
     }
 
     /**
@@ -70,13 +80,36 @@ class CommentController extends Controller
     public function update(UpdateCommentRequest $request, Comment $comment)
     {
         //
+        $validated = $request->validated();
+        if(array_key_exists('image',$validated)) {
+            $image = $validated['image'];
+            $currRelativeUrl = str_replace(url('/'),'',$comment->imgPath);
+            Storage::delete($currRelativeUrl);
+            if($image) {
+                $relativeUrl = $image->store('posts');
+                $validated['imgPath'] = url($relativeUrl);
+            }else{
+                $validated['imgPath'] = null;
+            }
+        }
+        $comment = $this->commentRepository->update($comment->id,$validated);
+        return new CommentResource($comment);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Comment $comment)
+    public function destroy(string $id)
     {
         //
+        $deleted = $this->commentRepository->delete($id);
+        if (!$deleted) {
+            return response()->json(["message" => "Comment not found"], 404);
+        }
+        try {
+            return response()->json(["message" => "Delete comment sucessfully"]);
+        } catch (Exception $e) {
+            return response()->json(["message" => "Comment not found"], 404);
+        }
     }
 }
