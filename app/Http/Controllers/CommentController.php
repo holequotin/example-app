@@ -41,8 +41,8 @@ class CommentController extends Controller
         $validated = $request->validated();
         if(array_key_exists('image',$validated)) {
             $image = $validated['image'];
-            $relativeUrl = $image->store('comments');
-            $validated['imgPath'] = url($relativeUrl);
+            $relativeUrl = $image->store('comments','public');
+            $validated['imgPath'] = url('storage/'.$relativeUrl);
         }
         $comment = $this->commentRepository->create($validated);
         return new CommentResource($comment);
