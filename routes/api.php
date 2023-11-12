@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -46,5 +47,7 @@ Route::prefix('fake')->group(function () {
     Route::post("/users",[UserController::class,'create']);
     Route::post("/posts/{id}",[PostController::class,'create']);
 });
+
+Route::resource('comments',CommentController::class);
 
 Route::get('hello/{userId}', [UserController::class,'hello'])->name("testApi");
