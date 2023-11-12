@@ -64,8 +64,8 @@ class PostController extends Controller
         $validated = $request->validated();
         if(array_key_exists('image',$validated)) {
             $image = $validated['image'];
-            $relativeUrl = $image->store('posts');
-            $validated['imgPath'] = url($relativeUrl);
+            $relativeUrl = $image->store('posts','public');
+            $validated['imgPath'] = url('storage/'.$relativeUrl);
         }
         $post = $this->postRepository->create($validated);
         return new PostResource($post);
