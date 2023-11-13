@@ -36,7 +36,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
     public function update(string $id, array $attribute)
     {
-        $object = $this->find($id);
+        $object = $this->_model::find($id);
         if($object) {
             $object->update($attribute);
         }

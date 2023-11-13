@@ -27,4 +27,12 @@ class FriendshipRepository extends BaseRepository implements FriendshipRepositor
                                 ->first();
         return $friendShip;
     }
+
+    public function getFriendsByUserId($userId)
+    {
+        $friendship = Friendship::where('user_id',$userId)
+                                ->orWhere('friend_id',$userId)
+                                ->get();
+        return $friendship;
+    }
 }
