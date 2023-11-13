@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FriendshipController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -49,5 +50,6 @@ Route::prefix('fake')->group(function () {
 });
 
 Route::resource('comments',CommentController::class);
+Route::resource('friends',FriendshipController::class);
 
 Route::get('hello/{userId}', [UserController::class,'hello'])->name("testApi");
