@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\FriendshipRepositoryInterface;
+use App\Enums\FriendshipStatus;
 use App\Models\Friendship;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreFriendshipRequest;
 use App\Http\Requests\UpdateFriendshipRequest;
+use App\Http\Requests\UpdateFriendshipStatusRequest;
 use App\Http\Resources\FriendshipResource;
 use Exception;
+use Illuminate\Http\Request;
 
 class FriendshipController extends Controller
 {   
@@ -25,7 +28,6 @@ class FriendshipController extends Controller
         $friendships = $this->friendshipRepository->getFriendsByUserId($userId);
         return FriendshipResource::collection($friendships);
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -41,14 +43,20 @@ class FriendshipController extends Controller
     {
         //
         $validated = $request->validated();
-        $friendship = $this->friendshipRepository->create($validated);
-        return new FriendshipResource($friendship);
+        if(!$this->friendshipRepository->friendshipIsExist($validated['user_id'],$validated['friend_id'])){
+            $validated['status'] = FriendshipStatus::Pending;
+            $friendship = $this->friendshipRepository->create($validated);
+            return new FriendshipResource($friendship);
+        }
+        return response()->json([
+            'error' => 'Friendship is existed'
+        ]);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string  $id)
+    public function show(string $id)
     { 
         $friendship = $this->friendshipRepository->find($id);
         if($friendship) {
@@ -57,6 +65,18 @@ class FriendshipController extends Controller
         return response()->json([
             "error" => "Friendship not found"
         ],404);
+    }
+
+    public function getFriendShip(Request $request) {
+        $user_id = $request->query('user_id');
+        $friend_id = $request->query('friend_id');
+        $friendship = $this->friendshipRepository->getFriendShip($user_id,$friend_id);
+        if($friendship){
+            return new FriendshipResource($friendship);
+        }
+        return response()->json([
+            "error" => "Friendship not found"
+        ]);
     }
 
     /**
@@ -83,6 +103,18 @@ class FriendshipController extends Controller
         ]);
     }
 
+    public function updateFriendshipStatus(UpdateFriendshipStatusRequest $request)
+    {
+        $validated = $request->validated();
+        $friendship = $this->friendshipRepository->updateFriendshipStatus($validated['user_id'],$validated['friend_id'],$validated['status']);
+        if($friendship){
+            return new FriendshipResource($friendship);
+        }
+        return response()->json([
+            'error' => 'Friendship not found',
+        ]);
+    }
+
     /**
      * Remove the specified resource from storage.
      */
@@ -98,5 +130,15 @@ class FriendshipController extends Controller
         } catch (Exception $e) {
             return response()->json(["message" => "Friendship not found"], 404);
         }
+    }
+
+    public function deleteFriendship(StoreFriendshipRequest $request)
+    {
+        $validated = $request->validated();
+        $deleted = $this->friendshipRepository->deleteFriendship($validated['user_id'],$validated['friend_id']);
+        if($deleted) {
+            return response()->json(["message" => "Delete friendship sucessfully"]);
+        }
+        return response()->json(["message" => "Friendship not found"], 404); 
     }
 }

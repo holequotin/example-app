@@ -9,8 +9,4 @@ class Friendship extends Model
 {
     use HasFactory;
     protected $fillable = ['user_id','friend_id','status'];
-    public function sendFriendRequest(string $userId, string $friendId)
-    {
-        
-    }
 }

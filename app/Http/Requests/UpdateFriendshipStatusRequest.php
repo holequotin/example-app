@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\FriendshipStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class StoreFriendshipRequest extends FormRequest
+class UpdateFriendshipStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +25,9 @@ class StoreFriendshipRequest extends FormRequest
     {
         return [
             //
-            'user_id' => 'required|exists:users,id',
-            'friend_id' => 'required|different:user_id|exists:users,id'
+            'user_id' => 'required',
+            'friend_id' => 'required',
+            'status' => ['required',Rule::in(FriendshipStatus::getValues())],
         ];
     }
 }

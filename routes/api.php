@@ -53,6 +53,9 @@ Route::resource('comments',CommentController::class);
 Route::resource('friendship',FriendshipController::class);
 
 Route::prefix('friends')->group(function () {
+    Route::get('/',[FriendshipController::class,'getFriendShip']);
     Route::get('/{userId}', [FriendshipController::class,'getFriendsByUserId']);
+    Route::put('/',[FriendshipController::class,'updateFriendshipStatus']);
+    Route::delete('/',[FriendshipController::class,'deleteFriendship']);
 });
 Route::get('hello/{userId}', [UserController::class,'hello'])->name("testApi");
