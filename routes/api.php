@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FriendshipController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -57,5 +58,12 @@ Route::prefix('friends')->group(function () {
     Route::get('/{userId}', [FriendshipController::class,'getFriendsByUserId']);
     Route::put('/',[FriendshipController::class,'updateFriendshipStatus']);
     Route::delete('/',[FriendshipController::class,'deleteFriendship']);
+});
+
+Route::prefix('reactions')->group(function () {
+    Route::get('/{postId}',[ReactionController::class,'getReactionByPost']);
+    Route::post('/',[ReactionController::class,'store']);
+    Route::patch('/',[ReactionController::class,'update']);
+    Route::delete('/',[ReactionController::class,'delete']);
 });
 Route::get('hello/{userId}', [UserController::class,'hello'])->name("testApi");
