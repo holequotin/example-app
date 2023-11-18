@@ -19,9 +19,15 @@ class ReactionController extends Controller
     //
     public function store(StoreReactionRequest $request)
     {
-        $validated = $request->validated();
-        $reaction = $this->reactionRepository->create($validated);
-        return new ReactionResource($reaction);
+        if(auth()->check()){
+            $validated = $request->validated();
+            $validated['user_id'] = auth()->user()->id;
+            $reaction = $this->reactionRepository->create($validated);
+            return new ReactionResource($reaction);
+        }
+        return response()->json([
+            'error' =>  "Unauthenticated"
+        ],401);
     }
 
     public function getReactionByPost(Request $request,string $postId)

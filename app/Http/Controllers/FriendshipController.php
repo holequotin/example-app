@@ -42,14 +42,20 @@ class FriendshipController extends Controller
     public function store(StoreFriendshipRequest $request)
     {
         //
-        $validated = $request->validated();
-        if(!$this->friendshipRepository->friendshipIsExist($validated['user_id'],$validated['friend_id'])){
-            $validated['status'] = FriendshipStatus::Pending;
-            $friendship = $this->friendshipRepository->create($validated);
-            return new FriendshipResource($friendship);
+        if(auth()->check()){
+            $validated = $request->validated();
+            $validated['user_id'] = auth()->user()->id;
+            if(!$this->friendshipRepository->friendshipIsExist($validated['user_id'],$validated['friend_id'])){
+                $validated['status'] = FriendshipStatus::Pending;
+                $friendship = $this->friendshipRepository->create($validated);
+                return new FriendshipResource($friendship);
+            }
+            return response()->json([
+                'error' => 'Friendship is existed'
+            ]);
         }
         return response()->json([
-            'error' => 'Friendship is existed'
+            "error" => "Unauthenticated"
         ]);
     }
 

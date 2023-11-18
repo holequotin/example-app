@@ -25,7 +25,6 @@ class StoreReactionRequest extends FormRequest
     {
         return [
             //
-            'user_id' => 'required|exists:users,id',
             'post_id' => 'required|exists:users,id',
             'type' => [
                 'required',

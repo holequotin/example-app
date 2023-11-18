@@ -41,14 +41,20 @@ class CommentController extends Controller
     public function store(StoreCommentRequest $request)
     {
         //
-        $validated = $request->validated();
-        if(array_key_exists('image',$validated)) {
-            $image = $validated['image'];
-            $relativeUrl = $image->store('comments','public');
-            $validated['imgPath'] = url('storage/'.$relativeUrl);
+        if(auth()->check()){
+            $validated = $request->validated();
+            $validated['user_id'] = auth()->user()->id;
+            if(array_key_exists('image',$validated)) {
+                $image = $validated['image'];
+                $relativeUrl = $image->store('comments','public');
+                $validated['imgPath'] = url('storage/'.$relativeUrl);
+            }
+            $comment = $this->commentRepository->create($validated);
+            return new CommentResource($comment);
         }
-        $comment = $this->commentRepository->create($validated);
-        return new CommentResource($comment);
+        return response()->json([
+            'error' => "Unauthenticated"
+        ],401);
     }
 
     /**

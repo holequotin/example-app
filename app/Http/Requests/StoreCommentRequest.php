@@ -25,7 +25,6 @@ class StoreCommentRequest extends FormRequest
             //
             'content' => "required_without:image|min:5",
             'image' => "required_without:content",
-            'user_id' => 'required|exists:users,id',
             'post_id' => 'required|exists:posts,id',
         ];
     }

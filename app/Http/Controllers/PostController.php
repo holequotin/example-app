@@ -61,14 +61,22 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         //
-        $validated = $request->validated();
-        if(array_key_exists('image',$validated)) {
-            $image = $validated['image'];
-            $relativeUrl = $image->store('posts','public');
-            $validated['imgPath'] = url('storage/'.$relativeUrl);
+        // dd($request->user());
+        //$request->user()->can('create');
+        if(auth()->check()){
+            $validated = $request->validated();
+            if(array_key_exists('image',$validated)) {
+                $image = $validated['image'];
+                $relativeUrl = $image->store('posts','public');
+                $validated['imgPath'] = url('storage/'.$relativeUrl);
+            }
+            $validated['user_id'] = $request->user()->id;
+            $post = $this->postRepository->create($validated);
+            return new PostResource($post);
         }
-        $post = $this->postRepository->create($validated);
-        return new PostResource($post);
+        return response()->json([
+            "error" => "Unauthenticated",
+        ]);
     }
 
     /**
