@@ -9,6 +9,7 @@ use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use App\Http\Resources\CommentResource;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CommentController extends Controller
@@ -86,36 +87,49 @@ class CommentController extends Controller
     public function update(UpdateCommentRequest $request, Comment $comment)
     {
         //
-        $validated = $request->validated();
-        if(array_key_exists('image',$validated)) {
-            $image = $validated['image'];
-            $currRelativeUrl = str_replace(url('/'),'',$comment->imgPath);
-            Storage::delete($currRelativeUrl);
-            if($image) {
-                $relativeUrl = $image->store('posts');
-                $validated['imgPath'] = url($relativeUrl);
-            }else{
-                $validated['imgPath'] = null;
+        if($this->authorize('update',[$comment,$request->user()])){
+            $validated = $request->validated();
+            if(array_key_exists('image',$validated)) {
+                $image = $validated['image'];
+                $currRelativeUrl = str_replace(url('/'),'',$comment->imgPath);
+                Storage::delete($currRelativeUrl);
+                if($image) {
+                    $relativeUrl = $image->store('posts');
+                    $validated['imgPath'] = url($relativeUrl);
+                }else{
+                    $validated['imgPath'] = null;
+                }
             }
+            $comment = $this->commentRepository->update($comment->id,$validated);
+            return new CommentResource($comment);
+        }else{
+            return response()->json([
+                'error' => 'Unauthorized'
+            ],401);
         }
-        $comment = $this->commentRepository->update($comment->id,$validated);
-        return new CommentResource($comment);
+        
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request,string $id)
     {
         //
-        $deleted = $this->commentRepository->delete($id);
-        if (!$deleted) {
-            return response()->json(["message" => "Comment not found"], 404);
+        $comment = $this->commentRepository->find($id);
+        if($this->authorize('delete',[$comment, $request->user()])){
+            $deleted = $this->commentRepository->delete($id);
+            if (!$deleted) {
+                return response()->json(["message" => "Comment not found"], 404);
+            }
+            try {
+                return response()->json(["message" => "Delete comment sucessfully"]);
+            } catch (Exception $e) {
+                return response()->json(["message" => "Comment not found"], 404);
+            }
         }
-        try {
-            return response()->json(["message" => "Delete comment sucessfully"]);
-        } catch (Exception $e) {
-            return response()->json(["message" => "Comment not found"], 404);
-        }
+        return response()->json([
+            'error' => 'Unauthorized'
+        ]);
     }
 }
