@@ -23,7 +23,6 @@ class StoreFriendshipRequest extends FormRequest
     {
         return [
             //
-            'user_id' => 'required|exists:users,id',
             'friend_id' => 'required|different:user_id|exists:users,id'
         ];
     }

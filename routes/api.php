@@ -40,9 +40,9 @@ Route::group([
 Route::controller(PostController::class)->group(function () {
     Route::get("/posts/{id}",[PostController::class,'show']);
     Route::get("/posts",[PostController::class,'index']);
-    Route::post("/posts",[PostController::class,'store']);
-    Route::patch("/posts/{post}",[PostController::class,'update']);
-    Route::delete("/posts/{post}",[PostController::class,'destroy']);
+    Route::post("/posts",[PostController::class,'store'])->middleware('auth');
+    Route::patch("/posts/{post}",[PostController::class,'update'])->middleware('auth');
+    Route::delete("/posts/{post}",[PostController::class,'destroy'])->middleware('auth');
 });
 
 Route::prefix('fake')->group(function () {
@@ -50,17 +50,17 @@ Route::prefix('fake')->group(function () {
     Route::post("/posts/{id}",[PostController::class,'create']);
 });
 
-Route::resource('comments',CommentController::class);
-Route::resource('friendship',FriendshipController::class);
+Route::resource('comments',CommentController::class)->middleware('auth');
+Route::resource('friendship',FriendshipController::class)->middleware('auth');
 
-Route::prefix('friends')->group(function () {
+Route::prefix('friends')->middleware('auth')->group(function () {
     Route::get('/',[FriendshipController::class,'getFriendShip']);
     Route::get('/{userId}', [FriendshipController::class,'getFriendsByUserId']);
     Route::put('/',[FriendshipController::class,'updateFriendshipStatus']);
     Route::delete('/',[FriendshipController::class,'deleteFriendship']);
 });
 
-Route::prefix('reactions')->group(function () {
+Route::prefix('reactions')->middleware('auth')->group(function () {
     Route::get('/{postId}',[ReactionController::class,'getReactionByPost']);
     Route::post('/',[ReactionController::class,'store']);
     Route::patch('/',[ReactionController::class,'update']);

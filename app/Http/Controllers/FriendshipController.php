@@ -42,14 +42,20 @@ class FriendshipController extends Controller
     public function store(StoreFriendshipRequest $request)
     {
         //
-        $validated = $request->validated();
-        if(!$this->friendshipRepository->friendshipIsExist($validated['user_id'],$validated['friend_id'])){
-            $validated['status'] = FriendshipStatus::Pending;
-            $friendship = $this->friendshipRepository->create($validated);
-            return new FriendshipResource($friendship);
+        if(auth()->check()){
+            $validated = $request->validated();
+            $validated['user_id'] = auth()->user()->id;
+            if(!$this->friendshipRepository->friendshipIsExist($validated['user_id'],$validated['friend_id'])){
+                $validated['status'] = FriendshipStatus::Pending;
+                $friendship = $this->friendshipRepository->create($validated);
+                return new FriendshipResource($friendship);
+            }
+            return response()->json([
+                'error' => 'Friendship is existed'
+            ]);
         }
         return response()->json([
-            'error' => 'Friendship is existed'
+            "error" => "Unauthenticated"
         ]);
     }
 
@@ -106,6 +112,7 @@ class FriendshipController extends Controller
     public function updateFriendshipStatus(UpdateFriendshipStatusRequest $request)
     {
         $validated = $request->validated();
+        $validated['user_id'] = $request->user()->id;
         $friendship = $this->friendshipRepository->updateFriendshipStatus($validated['user_id'],$validated['friend_id'],$validated['status']);
         if($friendship){
             return new FriendshipResource($friendship);
@@ -135,10 +142,17 @@ class FriendshipController extends Controller
     public function deleteFriendship(StoreFriendshipRequest $request)
     {
         $validated = $request->validated();
-        $deleted = $this->friendshipRepository->deleteFriendship($validated['user_id'],$validated['friend_id']);
-        if($deleted) {
-            return response()->json(["message" => "Delete friendship sucessfully"]);
+        $validated['user_id'] = $request->user()->id;
+        $friendship = $this->friendshipRepository->getFriendShip($request->user()->id,$validated['friend_id']);
+        if($this->authorize('delete',[$friendship,$request->user()])){
+            $deleted = $this->friendshipRepository->deleteFriendship($validated['user_id'],$validated['friend_id']);
+            if($deleted) {
+                return response()->json(["message" => "Delete friendship sucessfully"]);
+            }
+            return response()->json(["message" => "Friendship not found"], 404); 
         }
-        return response()->json(["message" => "Friendship not found"], 404); 
+        return response()->json([
+            'error' => 'Unauthorized'
+        ]);
     }
 }

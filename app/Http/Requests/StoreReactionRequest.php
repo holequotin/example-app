@@ -25,8 +25,7 @@ class StoreReactionRequest extends FormRequest
     {
         return [
             //
-            'user_id' => 'required|exists:users,id',
-            'post_id' => 'required|exists:users,id',
+            'post_id' => 'required|exists:posts,id',
             'type' => [
                 'required',
                 Rule::in(ReactionType::getValues())

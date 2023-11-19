@@ -61,14 +61,22 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         //
-        $validated = $request->validated();
-        if(array_key_exists('image',$validated)) {
-            $image = $validated['image'];
-            $relativeUrl = $image->store('posts','public');
-            $validated['imgPath'] = url('storage/'.$relativeUrl);
+        // dd($request->user());
+        //$request->user()->can('create');
+        if(auth()->check()){
+            $validated = $request->validated();
+            if(array_key_exists('image',$validated)) {
+                $image = $validated['image'];
+                $relativeUrl = $image->store('posts','public');
+                $validated['imgPath'] = url('storage/'.$relativeUrl);
+            }
+            $validated['user_id'] = $request->user()->id;
+            $post = $this->postRepository->create($validated);
+            return new PostResource($post);
         }
-        $post = $this->postRepository->create($validated);
-        return new PostResource($post);
+        return response()->json([
+            "error" => "Unauthenticated",
+        ]);
     }
 
     /**
@@ -101,20 +109,26 @@ class PostController extends Controller
     public function update(UpdatePostRequest $request, Post $post)
     {
         //
-        $validated = $request->validated();
-        if(array_key_exists('image',$validated)) {
-            $image = $validated['image'];
-            $currRelativeUrl = str_replace(url('/'),'',$post->imgPath);
-            Storage::delete($currRelativeUrl);
-            if($image) {
-                $relativeUrl = $image->store('posts');
-                $validated['imgPath'] = url($relativeUrl);
-            }else{
-                $validated['imgPath'] = null;
+        //dd($request->user());
+        if($this->authorize('update',[$post,$request->user()])){
+            $validated = $request->validated();
+            if(array_key_exists('image',$validated)) {
+                $image = $validated['image'];
+                $currRelativeUrl = str_replace(url('/'),'',$post->imgPath);
+                Storage::delete($currRelativeUrl);
+                if($image) {
+                    $relativeUrl = $image->store('posts');
+                    $validated['imgPath'] = url($relativeUrl);
+                }else{
+                    $validated['imgPath'] = null;
+                }
             }
+            $post = $this->postRepository->update($post->id,$validated);
+            return new PostResource($post);
         }
-        $post = $this->postRepository->update($post->id,$validated);
-        return new PostResource($post);
+        return response()->json([
+            'error' => 'Unauthorized'
+        ]);
     }
 
     /**
@@ -122,14 +136,20 @@ class PostController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
-        $deleted = $this->postRepository->delete($id);
-        if (!$deleted) {
-            return response()->json(["message" => "Post not found"], 404);
+        $post = $this->postRepository->find($id);
+        if($this->authorize('delete',[$post, $request->user()])){
+            $deleted = $this->postRepository->delete($id);
+            if (!$deleted) {
+                return response()->json(["message" => "Post not found"], 404);
+            }
+            try {
+                return response()->json(["message" => "Delete post sucessfully"]);
+            } catch (Exception $e) {
+                return response()->json(["message" => "Post not found"], 404);
+            }
         }
-        try {
-            return response()->json(["message" => "Delete post sucessfully"]);
-        } catch (Exception $e) {
-            return response()->json(["message" => "Post not found"], 404);
-        }
+        return response()->json([
+            'error' => 'Unauthorized'
+        ],401);
     }
 }

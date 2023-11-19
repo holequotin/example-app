@@ -22,7 +22,6 @@ class DeleteReactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => 'required|exists:users,id',
             'post_id' => 'required|exists:users,id',
         ];
     }

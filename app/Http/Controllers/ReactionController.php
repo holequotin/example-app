@@ -19,9 +19,15 @@ class ReactionController extends Controller
     //
     public function store(StoreReactionRequest $request)
     {
-        $validated = $request->validated();
-        $reaction = $this->reactionRepository->create($validated);
-        return new ReactionResource($reaction);
+        if(auth()->check()){
+            $validated = $request->validated();
+            $validated['user_id'] = auth()->user()->id;
+            $reaction = $this->reactionRepository->create($validated);
+            return new ReactionResource($reaction);
+        }
+        return response()->json([
+            'error' =>  "Unauthenticated"
+        ],401);
     }
 
     public function getReactionByPost(Request $request,string $postId)
@@ -33,6 +39,7 @@ class ReactionController extends Controller
     public function update(StoreReactionRequest $request)
     {
         $validated = $request->validated();
+        $validated['user_id'] = $request->user()->id;
         $reaction = $this->reactionRepository->getReaction($validated['user_id'], $validated['post_id']);
         if ($reaction) {
             $reaction = $this->reactionRepository->update($reaction->id, $validated);
@@ -46,8 +53,9 @@ class ReactionController extends Controller
     public function delete(DeleteReactionRequest $request)
     {
         $validated = $request->validated();
+        $validated['user_id'] = $request->user()->id;
         $reaction = $this->reactionRepository->getReaction($validated['user_id'], $validated['post_id']);
-        if ($reaction) {
+        if($this->authorize('delete',[$reaction,$request->user()])){
             $deleted = $this->reactionRepository->delete($reaction->id);
             if ($deleted) {
                 return response()->json([
@@ -58,10 +66,9 @@ class ReactionController extends Controller
                     "error" => "Can not delete reaction"
                 ],404);
             }
-        } else {
-            return response()->json([
-                "error" => "Reaction not found"
-            ],404);
         }
+        return response()->json([
+            'error' => 'Unauthorized'
+        ]);
     }
 }

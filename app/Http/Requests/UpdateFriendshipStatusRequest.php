@@ -25,7 +25,6 @@ class UpdateFriendshipStatusRequest extends FormRequest
     {
         return [
             //
-            'user_id' => 'required',
             'friend_id' => 'required',
             'status' => ['required',Rule::in(FriendshipStatus::getValues())],
         ];

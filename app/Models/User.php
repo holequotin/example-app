@@ -70,4 +70,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(User::class,'friends','user_id','friend_id');
     }
+
+    public function isAuthenticated() : bool
+    {   
+        return auth()->check();
+    }
 }
