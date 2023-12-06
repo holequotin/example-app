@@ -38,11 +38,15 @@ class AuthController extends Controller
     {
         $credentials = request(['email', 'password']);
 
-        if (! $token = auth()->attempt($credentials)) {
+        if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
-        return $this->respondWithToken($token);
+        $user = auth() -> user();
+        return response()->json([
+            'user' => $user,
+            'access_token' => $token,
+            'token_type' => 'bearer',
+        ]);
     }
 
     /**
