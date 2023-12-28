@@ -33,7 +33,7 @@ Route::group([
     Route::post('login', [AuthController::class,'login']);
     Route::post('logout', [AuthController::class,'logout']);
     Route::post('refresh', 'AuthController@refresh');
-    Route::post('me', 'AuthController@me');
+    Route::post('me', [AuthController::class,'me']);
     Route::post('register',[AuthController::class,'register']);
 });
 

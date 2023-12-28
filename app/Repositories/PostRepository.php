@@ -13,4 +13,9 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface  
     {
         return Post::where('user_id',$userId)->get();
     }
+
+    public function getAll()
+    {
+        return $this->_model::orderBy('created_at','desc')->get();
+    }
 }
