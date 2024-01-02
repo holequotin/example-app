@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Contracts\Repositories\FriendshipRepositoryInterface;
 use App\Models\Friendship;
+use App\Models\User;
 use App\Repositories\BaseRepository;
 
 class FriendshipRepository extends BaseRepository implements FriendshipRepositoryInterface
@@ -30,10 +31,22 @@ class FriendshipRepository extends BaseRepository implements FriendshipRepositor
 
     public function getFriendsByUserId($userId)
     {
-        $friendship = Friendship::where('user_id',$userId)
+        $friendships = Friendship::where('user_id',$userId)
                                 ->orWhere('friend_id',$userId)
                                 ->get();
-        return $friendship;
+        
+        // get friend's id
+        $friend_id = [];
+        foreach ($friendships as $friendship) {
+            if($friendship->user_id == $userId) {
+                $friend_id[] = $friendship->friend_id;
+            }else{
+                $friend_id[] = $friendship->user_id;
+            }
+        }
+        //get friends from friend's id
+        $friends = User::whereIn('id',$friend_id)->get();
+        return $friends;
     }
 
     public function updateFriendshipStatus($userId, $friendId,$status) {

@@ -55,7 +55,7 @@ Route::resource('friendship',FriendshipController::class)->middleware('auth');
 
 Route::prefix('friends')->middleware('auth')->group(function () {
     Route::get('/',[FriendshipController::class,'getFriendShip']);
-    Route::get('/{userId}', [FriendshipController::class,'getFriendsByUserId']);
+    Route::post('/', [FriendshipController::class,'getFriends']);
     Route::put('/',[FriendshipController::class,'updateFriendshipStatus']);
     Route::delete('/',[FriendshipController::class,'deleteFriendship']);
 });

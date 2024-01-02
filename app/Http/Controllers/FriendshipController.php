@@ -10,6 +10,7 @@ use App\Http\Requests\StoreFriendshipRequest;
 use App\Http\Requests\UpdateFriendshipRequest;
 use App\Http\Requests\UpdateFriendshipStatusRequest;
 use App\Http\Resources\FriendshipResource;
+use App\Http\Resources\UserResource;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -22,11 +23,12 @@ class FriendshipController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function getFriendsByUserId(string $userId)
+    public function getFriends()
     {
         //
-        $friendships = $this->friendshipRepository->getFriendsByUserId($userId);
-        return FriendshipResource::collection($friendships);
+        $userId = auth()->user()->id;
+        $friends = $this->friendshipRepository->getFriendsByUserId($userId);
+        return UserResource::collection($friends);
     }
     /**
      * Show the form for creating a new resource.
