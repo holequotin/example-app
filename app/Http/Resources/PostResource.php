@@ -20,7 +20,8 @@ class PostResource extends JsonResource
             'imgPath' => $this->imgPath,
             'createdAt' => $this->created_at,
             // user() => error
-            'user' => new UserResource($this->user)
+            'user' => new UserResource($this->user),
+            'reactions' => ReactionResource::collection($this->reactions)
         ];
     }
 }

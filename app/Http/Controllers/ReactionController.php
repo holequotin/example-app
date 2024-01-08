@@ -52,6 +52,7 @@ class ReactionController extends Controller
 
     public function delete(DeleteReactionRequest $request)
     {
+        // dd($request);
         $validated = $request->validated();
         $validated['user_id'] = $request->user()->id;
         $reaction = $this->reactionRepository->getReaction($validated['user_id'], $validated['post_id']);
