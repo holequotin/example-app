@@ -24,7 +24,8 @@ class CommentController extends Controller
     public function index()
     {
         //
-        $comments = $this->commentRepository->getAll();
+        $id = request('post_id');
+        $comments = $this->commentRepository->getCommentsByPost($id);
         return CommentResource::collection($comments);
     }
 
