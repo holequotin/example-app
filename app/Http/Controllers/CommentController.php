@@ -95,8 +95,8 @@ class CommentController extends Controller
                 $currRelativeUrl = str_replace(url('/'),'',$comment->imgPath);
                 Storage::delete($currRelativeUrl);
                 if($image) {
-                    $relativeUrl = $image->store('posts');
-                    $validated['imgPath'] = url($relativeUrl);
+                    $relativeUrl = $image->store('comments','public');
+                    $validated['imgPath'] = url('storage/'.$relativeUrl);
                 }else{
                     $validated['imgPath'] = null;
                 }

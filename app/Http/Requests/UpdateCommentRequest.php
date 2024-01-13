@@ -23,8 +23,8 @@ class UpdateCommentRequest extends FormRequest
     {
         return [
             //
-            'content' => "required_without:image|min:5",
-            'image' => "required_without:content"
+            'content' => "",
+            'image' => ""
         ];
     }
 }

@@ -21,7 +21,8 @@ class PostResource extends JsonResource
             'createdAt' => $this->created_at,
             // user() => error
             'user' => new UserResource($this->user),
-            'reactions' => ReactionResource::collection($this->reactions)
+            'reactions' => ReactionResource::collection($this->reactions),
+            'comments' => CommentResource::collection($this->comments)
         ];
     }
 }

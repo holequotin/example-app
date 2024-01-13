@@ -19,7 +19,7 @@ class CommentResource extends JsonResource
             'content' => $this->content,
             'imgPath' => $this->imgPath,
             'user' => new UserResource($this->user),
-            'post' => new PostResource($this->post)
+            'post_id' => $this->post_id
         ];
     }
 }
