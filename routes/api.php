@@ -66,4 +66,8 @@ Route::prefix('reactions')->middleware('auth')->group(function () {
     Route::patch('/',[ReactionController::class,'update']);
     Route::delete('/',[ReactionController::class,'delete']);
 });
+Route::prefix('user')->middleware('auth')->group(function () {
+    Route::get('/{user_id}/friends',[FriendshipController::class,'getFriendsByUserId']);
+});
 Route::get('hello/{userId}', [UserController::class,'hello'])->name("testApi");
+Route::get('users',[UserController::class,'show'])->name('getUsers');

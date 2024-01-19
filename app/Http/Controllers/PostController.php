@@ -27,7 +27,7 @@ class PostController extends Controller
     public function index()
     {
         //
-        $userId = request('userId');
+        $userId = request('user_id');
         if (!$userId) {
             $posts = $this->postRepository->getAll();
         } else {

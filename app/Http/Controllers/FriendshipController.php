@@ -157,4 +157,11 @@ class FriendshipController extends Controller
             'error' => 'Unauthorized'
         ]);
     }
+
+    public function getFriendsByUserId($Request) 
+    {
+        $user_id = request('user_id');
+        $friends = $this->friendshipRepository->getFriendsByUserId(($user_id));
+        return UserResource::collection($friends);
+    }
 }
