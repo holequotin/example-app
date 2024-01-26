@@ -35,6 +35,8 @@ Route::group([
     Route::post('refresh', [AuthController::class,'refresh']);
     Route::post('me', [AuthController::class,'me']);
     Route::post('register',[AuthController::class,'register']);
+    Route::post('forget_password',[AuthController::class,'forgetPassword']);
+    Route::post('reset_password',[AuthController::class,'resetPassword']);
 });
 
 Route::controller(PostController::class)->group(function () {
